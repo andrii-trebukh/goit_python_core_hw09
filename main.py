@@ -54,7 +54,7 @@ def show_all_command(*args):
     return "\n".join(output)
 
 
-@command_handler(("good bye", "close", "exit", "."))
+@command_handler(("good bye", "close", "exit", "\."))
 def exit_command(*args):
     global EXIT_FLAG
     EXIT_FLAG = True
