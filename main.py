@@ -50,11 +50,13 @@ def list_command(*args):
 
 @command_handler("show all")
 def show_all_command(*args):
+    if not PHONES:
+        raise ValueError("It's empty. There are no any records.")
     output = [f"{name}: {phone}" for name, phone in PHONES.items()]
     return "\n".join(output)
 
 
-@command_handler(("good bye", "close", "exit", "\."))
+@command_handler(("good bye", "close", "exit", "."))
 def exit_command(*args):
     global EXIT_FLAG
     EXIT_FLAG = True
@@ -73,6 +75,14 @@ def add_command(name, phone):
         raise ValueError(f'Name "{name}" already exist')
     PHONES[name] = phone
     return f"New name {name} and phone number {phone} have been added"
+
+
+@command_handler("remove")
+def remove_command(name):
+    if not PHONES.get(name):
+        raise ValueError(f'Name "{name}" does not exist')
+    PHONES.pop(name)
+    return f"{name} phone number has been removed"
 
 
 @command_handler("change")
@@ -96,18 +106,17 @@ def main():
         input_string = input(">>> ")
         input_string = input_string.strip()
 
+        # some workaround: adding space at the end of the string
+        # need for correct detection of the command without args
+        # will be further stripped
+        input_string += " "
+
         command = None
         for check_command in COMMANDS:
-            match_command = re.match(
-                rf"^{check_command}(?:\s|$)",
-                input_string,
-                re.IGNORECASE
-            )
 
-            if match_command:
+            if input_string.lower().startswith(f"{check_command} "):
                 command = check_command
-
-                args = input_string[match_command.end():]
+                args = input_string[len(check_command):]
 
                 # removing excess spaces
                 args = args.strip()
